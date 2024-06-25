@@ -1,12 +1,374 @@
 <template>
   <div>
-    Lorem ipsum
+    <div id="content">
+
+    <div id="minefield">
+      <div class="block" v-for="item in blocks" :key="item.index" :index="item.index"
+           @click.left="click(item.index, item.row, item.col)"
+           @click.right="flag(item.index, item.row, item.col)">
+        <div class="innerBlock flagBlock" v-if="item.flag"><el-icon><CirclePlus /></el-icon></div>
+        <div class="innerBlock closeBlock" v-else-if="!item.open"></div>
+        <div class="innerBlock mineBlock" v-else-if="item.mine==1"><i class="el-icon-close"></i></div>
+        <div class="innerBlock" v-else>{{item.number==0 ? '' : item.number}}</div>
+      </div>
+    </div>
+    <div>{{flagNumber}} / {{config.mines}}</div>
+    <el-button type="primary" @click="restart()">再来一局</el-button>
+    <el-dialog title="GG" center  v-model="gameOver" 
+    :show-close="falseData" 
+    :close-on-click-modal="falseData" 
+     :close-on-press-escape="falseData">  
+     <div style="display:flex;justify-content: center;"><el-button type="primary" @click="restart()">再来一局</el-button></div>
+    </el-dialog>
+    <el-dialog title="You Win !!!" center  v-model="win" 
+    :show-close="falseData" 
+    :close-on-click-modal="falseData" 
+     :close-on-press-escape="falseData">  
+     <div style="display:flex;justify-content: center;">Your score:  {{diff}}  s </div>
+     <div style="display:flex;justify-content: center;"> <el-button type="primary" @click="restart()">再来一局</el-button></div>
+    </el-dialog>
+    <el-dialog
+      title="新游戏"
+      center
+      v-model="isDialogShow"
+      width="500px"
+      :show-close="falseData"
+      :close-on-click-modal="falseData"
+      :close-on-press-escape="falseData">
+      <el-form label-width="80px">
+        <el-form-item label="格子大小">
+          <el-input-number v-model="config.blockSize" :min="10" :max="20" :step="5"></el-input-number>
+        </el-form-item>
+        <el-form-item label="难度">
+          <el-radio-group v-model="config.difficulty">
+            <el-radio :label="1">简单</el-radio>
+            <el-radio :label="2">中等</el-radio>
+            <el-radio :label="3">困难</el-radio>
+            <el-radio :label="4">自定义</el-radio>
+          </el-radio-group>
+          <div>
+            <div class="dialogRow">
+              <span class="dialogRowLabel">宽</span><el-input-number :disabled="config.difficulty!==4" v-model="config.width" :min="10" :max="50"></el-input-number>
+            </div>
+            <div class="dialogRow">
+              <span class="dialogRowLabel">高</span><el-input-number :disabled="config.difficulty!==4" v-model="config.height" :min="10" :max="50"></el-input-number>
+            </div>
+            <div class="dialogRow">
+              <span class="dialogRowLabel">雷</span><el-input-number :disabled="config.difficulty!==4" v-model="config.mines" :min="1"></el-input-number>
+            </div>
+          </div>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="">
+        <el-button type="primary" @click="start()">开始</el-button>
+      </span>
+    </el-dialog>
+  </div>
   </div>
 </template>
 
-<script setup lang="ts">
+<!-- <script setup lang="ts">
 
-</script>
+</script> -->
 
-<style lang="less" scoped>
+<!-- <style lang="less" scoped>
+</style> -->
+
+
+<style scoped lang="scss">
+  #content{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    justify-content: center;
+    #minefield{
+      border-bottom: 1px solid black;
+      border-right: 1px solid black;
+      display: flex;
+      flex-flow: row wrap;
+      .block{
+        text-align: center;
+        border-top: 1px solid black;
+        border-left: 1px solid black;
+        box-sizing: border-box;
+        cursor: default;
+        .innerBlock{
+          width: 100%;
+          height: 100%;
+          font-size: 20px;
+        }
+        .flagBlock{
+          background-color: #ccc;
+        }
+        .closeBlock{
+          background-color: #ccc;
+        }
+        .mineBlock{
+          color: red;
+        }
+      }
+    }
+    .el-form-item >>> .el-form-item__label{
+      padding-right: 20px;
+    }
+    .dialogRow{
+      margin: 10px 0;
+      .dialogRowLabel{
+        margin-right: 20px;
+      }
+    }
+  }
 </style>
+
+<script>
+// this.domElement.addEventListener( 'contextmenu', function ( event ) { event.preventDefault(); }, false );
+
+import $ from 'jquery'
+  export default {
+    name: 'minesweeper',
+    data () {
+      return {
+        falseData: false,
+        isDialogShow: true,
+        gameOver: false,
+        win: false,
+        config: {
+          blockSize: 40,
+          difficulty: 1,
+          width: 10,
+          height: 10,
+          mines: 10
+        },
+        blocks: [],
+        isGenerate: false,
+        flagNumber: 0,
+        startTime: null,
+        diff:null
+      }
+    },
+    mounted: function () {
+      let that = this;
+      document.oncontextmenu = function(){
+    return false;
+  };
+    },
+    // window.oncontextmenu: function () { return false; },
+    methods: {
+      restart(){
+        this.isDialogShow = true;
+        this.gameOver = false;
+        this.win= false;
+      },
+      start(){
+        console.log("-----------",this.config);
+        if(this.config.mines > this.config.width * this.config.height / 2){
+          this.$alert("雷密度不能超过50%");
+          return;
+        }
+
+        this.isDialogShow = false;
+        this.isGenerate = false;
+        this.flagNumber = 0;
+        this.startTime = new Date();
+
+        //调整雷区的宽高
+        $("#minefield").css("width", this.config.width * this.config.blockSize + ((this.config.blockSize/10) +1) +"px")
+          .css("height", this.config.height * this.config.blockSize + "px");
+
+        //生成blocks
+        this.blocks = [];
+        for(let i=0;i<this.config.height;i++){
+          for(let j=0;j<this.config.width;j++){
+            this.blocks.push({
+              index: i*this.config.width+j,
+              row: i,
+              col: j,
+              mine: 0,
+              number: 0,
+              open: false,
+              flag: false,
+            });
+          }
+        }
+
+        this.$nextTick(() => {
+          $(".block").css("width", this.config.blockSize + "px")
+            .css("height", this.config.blockSize + "px")
+            .css("line-height", this.config.blockSize + "px");
+        });
+      },
+      generate(safeIndex){
+        let that = this;
+        do{
+          //清空雷区
+          this.blocks = [];
+          for(let i=0;i<this.config.height;i++){
+            for(let j=0;j<this.config.width;j++){
+              this.blocks.push({
+                index: i*this.config.width+j,
+                row: i,
+                col: j,
+                mine: 0,
+                number: 0,
+                open: false,
+                flag: false,
+              });
+            }
+          }
+
+          //布雷
+          for(let i=0;i<this.config.mines;i++){
+            let index = 0;
+            do{
+              index = Math.floor(Math.random()*this.config.width*this.config.height);
+            } while (this.blocks[index].mine==1);
+            this.blocks[index].mine = 1;
+          }
+
+          //计算number
+          for(let i=0;i<this.config.height;i++){
+            for(let j=0;j<this.config.width;j++){
+              let index = i*this.config.width+j;
+              if(this.blocks[index].mine==0){
+                this.blocks[index].number +=
+                  some(i, j-1)
+                  + some(i, j+1)
+                  + some(i-1, j-1)
+                  + some(i-1, j)
+                  + some(i-1, j+1)
+                  + some(i+1, j-1)
+                  + some(i+1, j)
+                  + some(i+1, j+1);
+              }
+            }
+            function some(i, j) {
+              if(i < 0 || i > that.config.height -1) return 0;
+              if(j < 0 || j > that.config.width -1) return 0;
+              return that.blocks[i*that.config.width+j].mine;
+            }
+          }
+        } while(this.blocks[safeIndex].number!=0 || this.blocks[safeIndex].mine!=0);
+      },
+      click(index, row, col){
+        if(!this.isGenerate){
+          //第一次点击，再布雷，保证第一次点开是0
+          this.generate(index);
+          this.isGenerate = true;
+          this.click(index, row, col);
+        } else {
+          if(!this.blocks[index].flag){
+            if(!this.blocks[index].open){
+              //如果没打开，则打开
+              this.open(row, col);
+            } else {
+              //如果已经打开，执行快速打开
+              this.quickOpen(row, col);
+            }
+          }
+        }
+      },
+      open(i, j){
+        let index = i*this.config.width+j;
+        if(i < 0 || i > this.config.height -1) return 0;
+        if(j < 0 || j > this.config.width -1) return 0;
+        if(this.blocks[index].flag)
+          return;
+        if(this.blocks[index].open)
+          return;
+        if(this.blocks[index].mine>0){
+          // this.$alert("GG");
+          this.gameOver = true;
+        } else {
+          this.blocks[index].open = true;
+          if(this.blocks[index].number==0){
+            this.open(i, j-1);
+            this.open(i, j+1);
+            this.open(i-1, j-1);
+            this.open(i-1, j);
+            this.open(i-1, j+1);
+            this.open(i+1, j-1);
+            this.open(i+1, j);
+            this.open(i+1, j+1);
+          }
+          if(this.isWin()){
+            let endTime = new Date();
+            this.diff = (endTime.getTime() - this.startTime.getTime()) / 1000;
+            this.win = true;
+            // let diff = (endTime.getTime() - this.startTime.getTime()) / 1000;
+            // this.$alert("Win! Your score: " + diff + " s", {
+            //   callback: () => {
+            //     this.isDialogShow = true;
+            //   }
+            // });
+          }
+        }
+      },
+      quickOpen(i, j){
+        let that = this;
+        let index = i*this.config.width+j;
+        let number = this.blocks[index].number;
+        let flagNumber = 0;
+        flagNumber +=
+          some(i, j-1)
+          + some(i, j+1)
+          + some(i-1, j-1)
+          + some(i-1, j)
+          + some(i-1, j+1)
+          + some(i+1, j-1)
+          + some(i+1, j)
+          + some(i+1, j+1);
+        if(number == flagNumber){
+          //如果两个数相等，则等价于打开周围8块
+          this.open(i, j-1);
+          this.open(i, j+1);
+          this.open(i-1, j-1);
+          this.open(i-1, j);
+          this.open(i-1, j+1);
+          this.open(i+1, j-1);
+          this.open(i+1, j);
+          this.open(i+1, j+1);
+        }
+        function some(i, j) {
+          if(i < 0 || i > that.config.height -1) return 0;
+          if(j < 0 || j > that.config.width -1) return 0;
+          return that.blocks[i*that.config.width+j].flag ? 1 : 0;
+        }
+      },
+      isWin(){
+        let result = true;
+        for(let index in this.blocks){
+          if(this.blocks[index].mine==0 && !this.blocks[index].open){
+            result = false;
+            break;
+          }
+        }
+        return result;
+      },
+      flag(index, row, col){
+        if(this.isGenerate && !this.blocks[index].open){
+          this.flagNumber += this.blocks[index].flag ? -1 : 1;
+          this.blocks[index].flag = !this.blocks[index].flag;
+        }
+      }
+    },
+    watch: {
+      "config.difficulty": function (val, oldVal) {
+        if(val===1){
+          this.config.width=10;
+          this.config.height=10;
+          this.config.mines=10;
+        } else if(val===2){
+          this.config.width=16;
+          this.config.height=16;
+          this.config.mines=40;
+        } else if(val===3){
+          this.config.width=30;
+          this.config.height=16;
+          this.config.mines=99;
+        }
+      }
+    }
+  }
+</script>

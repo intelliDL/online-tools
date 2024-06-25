@@ -1,5 +1,7 @@
 import { ArrowsShuffle } from '@vicons/tabler';
 import { defineTool } from '../tool';
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
 
 export const tool = defineTool({
   name: 'Minesweeper',
