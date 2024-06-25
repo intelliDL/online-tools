@@ -91,6 +91,8 @@ tools:
     measurement: Messung
     text: Text
     data: Daten
+    game: Spiel
+
   password-strength-analyser:
     title: Passwortstärken-Analysator
     description: >-

@@ -1,6 +1,10 @@
 import { tool as base64FileConverter } from './base64-file-converter';
 import { tool as base64StringConverter } from './base64-string-converter';
 import { tool as basicAuthGenerator } from './basic-auth-generator';
+import { tool as matchingGame } from './matchingGame';
+import { tool as minesweeper } from './minesweeper';
+import { tool as tetris } from './tetris';
+import { tool as sudoku } from './sudoku';
 import { tool as regex } from './regex';
 
 import { tool as asciiTextDrawer } from './ascii-text-drawer';
@@ -179,6 +183,10 @@ export const toolsByCategory: ToolCategory[] = [
   {
     name: 'Data',
     components: [phoneParserAndFormatter, ibanValidatorAndParser],
+  },
+  {
+    name: 'Game',
+    components: [sudoku, tetris, minesweeper, matchingGame],
   },
 ];
 

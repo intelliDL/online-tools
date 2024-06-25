@@ -63,6 +63,7 @@ tools:
     measurement: Mesure
     text: Texte
     data: Données
+    game: jeu
 
   token-generator:
     title: Générateur de token

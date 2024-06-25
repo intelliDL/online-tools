@@ -69,6 +69,7 @@ tools:
     measurement: Đo lường
     text: Văn bản
     data: Dữ liệu
+    game: trò chơi
 
   password-strength-analyser:
     title: Bộ phân tích độ mạnh mật khẩu

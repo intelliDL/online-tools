@@ -69,6 +69,7 @@ tools:
     measurement: Measurement
     text: Text
     data: Data
+    game: Game
 
   password-strength-analyser:
     title: Password strength analyser
@@ -395,3 +396,19 @@ tools:
   regex:
     title: Regex Tools
     description: Regex Tools, provide common script, test and verify function.
+
+  sudoku:
+    title: sudoku
+    description: sudoku game
+
+  tetris:
+    title: tetris
+    description: tetris game
+
+  minesweeper:
+    title: minesweeper
+    description: minesweeper game
+
+  matchingGame:
+    title: matchingGame
+    description: matching-game / linkage / connect the dots

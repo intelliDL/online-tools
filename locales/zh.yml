@@ -69,6 +69,7 @@ tools:
     measurement: '测量'
     text: '文本'
     data: '数据'
+    game: '小游戏'
 
   password-strength-analyser:
     title: 密码强度分析仪
@@ -391,3 +392,19 @@ tools:
   regex:
     title: 正则表达式工具
     description: 正则表达式工具，提供常用的正则，并支持在线测试，验证。  
+
+  sudoku:
+    title: 数独
+    description: 数独小游戏
+
+  tetris:
+    title: 俄罗斯方块
+    description: 俄罗斯方块小游戏
+
+  minesweeper:
+    title: 扫雷
+    description: 扫雷小游戏
+
+  matchingGame:
+    title: 连连看
+    description: 连连看小游戏
