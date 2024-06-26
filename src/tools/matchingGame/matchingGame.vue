@@ -42,7 +42,7 @@
 
 </script> -->
 
-<style scoped lang="scss">
+<style >
   #content{
     width: 100vw;
     height: 100vh;

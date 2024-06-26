@@ -75,7 +75,7 @@
 </style> -->
 
 
-<style scoped lang="scss">
+<style >
   #content{
     width: 100%;
     height: 100%;
@@ -110,9 +110,7 @@
         }
       }
     }
-    // .el-form-item >>> .el-form-item__label{
-    //   padding-right: 20px;
-    // }
+
     .dialogRow{
       margin: 10px 0;
       .dialogRowLabel{
