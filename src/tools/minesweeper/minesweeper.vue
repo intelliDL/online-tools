@@ -110,9 +110,9 @@
         }
       }
     }
-    .el-form-item >>> .el-form-item__label{
-      padding-right: 20px;
-    }
+    // .el-form-item >>> .el-form-item__label{
+    //   padding-right: 20px;
+    // }
     .dialogRow{
       margin: 10px 0;
       .dialogRowLabel{
