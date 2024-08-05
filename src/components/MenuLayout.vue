@@ -22,6 +22,7 @@ const siderPosition = computed(() => (isSmallScreen.value ? 'absolute' : 'static
     </n-layout-sider>
     <n-layout class="content">
       <slot name="content" />
+      <a class="slide" href="https://beian.miit.gov.cn/" target="_blank">辽ICP备2024032834号-1</a>
       <div v-show="isSmallScreen && !isMenuCollapsed" class="overlay" @click="isMenuCollapsed = true" />
     </n-layout>
   </n-layout>
@@ -36,6 +37,15 @@ const siderPosition = computed(() => (isSmallScreen.value ? 'absolute' : 'static
   height: 100%;
   background-color: #00000080;
   cursor: pointer;
+}
+.slide{
+  display: inline-block;
+    vertical-align: middle;
+    margin-right: 15px;
+    font-size: 12px;
+    line-height: 26px;
+    color: #ccc;
+    white-space: nowrap;
 }
 
 .content {
